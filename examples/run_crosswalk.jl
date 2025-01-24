@@ -2,24 +2,23 @@ using Revise
 
 using SPAIS
 using Random
-
-include("pendulum.jl")
 include("utils.jl")
+include("crosswalk.jl")
+
 
 # Experiment params
 Random.seed!(1234)
-dir="results/pendulum/"
+dir="results/crosswalk"
 Neps=50_000
 Npretrain=100
 
-# Problem setup params
-failure_target=π/4
-dt = 0.1
-Nsteps_per_episode = 20
-noise_dist=Normal(0, 0.3)
 
-Px, mdp = gen_topple_mdp(px=noise_dist, Nsteps=Nsteps_per_episode, dt=dt, failure_thresh=failure_target, discrete=false)
-S = state_space(mdp; μ=[0.95, 0.0, 0.0], σ=[0.57, 0.1, 0.1])
+# Problem setup params
+gt = 5.9e-5
+failure_target = 0.99f0
+Nsteps_per_episode=100
+Px, mdp = gen_crosswalk_problem()
+S = state_space(mdp, μ=Float32[0.22, 25.0, -5, 1.5, 1.0, 16.0, 14.5, 1.0, 0.0], σ=Float32[.15f0, .56, 3.0, 0.2, 0.3, 7, 6, 1f0, 1f0])
 X = action_space(Px)
 
 # Create a state-based proposal distribution for the pendulum
@@ -31,7 +30,7 @@ proposal = statebased_gaussian(S, X)
     likelihood=LogisticValidationLikelihood(failure_target, 0.01),
     f_target=failure_target,
     N=Neps,
-    ΔN=200,
+    ΔN=100,
     max_steps=Nsteps_per_episode,
     S=S,
     agent_pretrain=pretrain_policy(mdp, Px, S, Nepochs=Npretrain),
