@@ -25,4 +25,10 @@ Next, run the `run_pendulum.jl` script:
 julia --project run_pendulum.jl
 ```
 
+Or, try the autonomous vehicle example:
+
+```
+julia --project run_crosswalk.jl
+```
+
 More examples are coming soon!
